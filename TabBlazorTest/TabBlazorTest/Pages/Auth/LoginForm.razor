@@ -1,0 +1,67 @@
+﻿@page "/"
+@page "/login"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components
+@using TabBlazor
+@using TabBlazor.Components.Modals
+@using TabBlazor.Services
+<h3>LoginForm</h3>
+
+<TablerForm Model="@Model" OnValidSubmit="Submit">    
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText class="form-control" @bind-Value="Model.Email"></InputText>
+        <TabValidationMessage For="(() => Model.Email)"></TabValidationMessage>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText type="password" class="form-control" @bind-Value="Model.Password"></InputText>
+        <TabValidationMessage For="(() => Model.Password)"></TabValidationMessage>
+    </div>
+
+    <Button Type="ButtonType.Submit" class="mt-1" Text="Login" BackgroundColor="TablerColor.Primary"></Button>
+
+</TablerForm>
+
+@code {
+
+    public class LoginRequest
+    {
+        [Required]
+        [EmailAddress]
+        public string? Email { get; set; }
+        [Required]
+        [MinLength(8)]
+        public string? Password { get; set; }
+    }
+
+    private LoginRequest Model { get; set; } = new();
+
+    [Inject] private ToastService toastService { get; set; }
+    @inject IModalService ModalService
+
+    protected async Task Submit(EditContext obj)
+    {
+        await toastService.AddToastAsync
+        (
+            new ToastModel 
+            {
+                Title = @DateTime.Now.ToString("T"),
+                Message = $"Email: {Model.Email} Password: {Model.Password}"
+            }
+        );
+
+    }
+
+    protected async Task ShowInfoModal()
+    {
+        await ModalService.ShowDialogAsync(new TabBlazor.Components.Modals.DialogOptions
+            {
+                MainText = "You have a new message",
+                SubText = "Check your inbox for more information",
+                CancelText = "",
+                StatusColor = TablerColor.Primary
+            });
+    }
+}
